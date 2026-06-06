@@ -20,12 +20,15 @@ Do not add dependencies or replace the stack unless asked.
 
 ## Skills and Docs
 
+Project skills live in `.agents/skills/` with versions pinned in `skills-lock.json` at the repo root. Install or update skills with the Skills CLI (`bun x skills`).
+
 Use relevant installed skills for framework-specific work.
 
 For Next.js-specific uncertainty, prefer the installed docs in `node_modules/next/dist/docs/`.
 
 ## Project Map
 
+- `.agents/skills/`: project agent skills (`skills-lock.json` pins versions)
 - `src/app/`: routes, layouts, and global styles
 - `src/components/`: reusable UI components
 - `src/lib/`: shared utilities and Supabase clients
