@@ -1,0 +1,100 @@
+version: "3"
+
+silent: true
+
+vars:
+  BUN: mise exec -- bun
+  PREK: mise exec -- prek
+  SUPABASE: mise exec -- supabase
+
+tasks:
+  setup:
+    desc: Install dependencies and create .env.local if it does not exist.
+    cmds:
+      - "{{.BUN}} install"
+      - |
+        {{.BUN}} -e "const { copyFileSync, existsSync } = require('node:fs'); if (!existsSync('.env.local')) copyFileSync('.env.example', '.env.local')"
+
+  dev:
+    desc: Start the development server.
+    cmds:
+      - "{{.BUN}} run dev"
+
+  build:
+    desc: Build the app for production.
+    cmds:
+      - "{{.BUN}} run build"
+
+  check:
+    desc: Run Biome checks.
+    cmds:
+      - "{{.BUN}} run check"
+
+  check:write:
+    desc: Run Biome checks and apply safe fixes.
+    cmds:
+      - "{{.BUN}} run check:write"
+
+  hooks:install:
+    desc: Install the prek pre-commit hook.
+    cmds:
+      - "{{.PREK}} install -f"
+
+  hooks:validate:
+    desc: Validate the prek configuration.
+    cmds:
+      - "{{.PREK}} validate-config prek.toml"
+
+  hooks:run:
+    desc: Run prek hooks across all files.
+    cmds:
+      - "{{.PREK}} run --all-files"
+
+  typecheck:
+    desc: Generate Next route types and run TypeScript.
+    cmds:
+      - "{{.BUN}} run typecheck"
+
+  test:
+    desc: Run unit tests in watch mode.
+    cmds:
+      - "{{.BUN}} run test"
+
+  test:run:
+    desc: Run unit tests once.
+    cmds:
+      - "{{.BUN}} run test:run"
+
+  test:watch:
+    desc: Run unit tests in watch mode.
+    cmds:
+      - "{{.BUN}} run test"
+
+  db:login:
+    desc: Authenticate the Supabase CLI.
+    cmds:
+      - "{{.SUPABASE}} login"
+
+  db:link:
+    desc: Link this repo to the hosted Supabase project.
+    cmds:
+      - '{{.SUPABASE}} link --project-ref "{{.SUPABASE_PROJECT_REF}}"'
+
+  db:push:
+    desc: Apply generated Supabase migrations and seed data.
+    cmds:
+      - "{{.SUPABASE}} db push --include-seed"
+
+  db:types:
+    desc: Generate Supabase TypeScript types.
+    cmds:
+      - |
+        {{.BUN}} -e "const { mkdirSync } = require('node:fs'); mkdirSync('src/lib/supabase', { recursive: true })"
+      - '{{.SUPABASE}} gen types typescript --project-id "{{.SUPABASE_PROJECT_REF}}" > src/lib/supabase/database.types.ts'
+
+  verify:
+    desc: Run checks, typecheck, and unit tests.
+    cmds:
+      - task: check
+      - task: typecheck
+      - task: test:run
